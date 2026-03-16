@@ -11,8 +11,22 @@ function UploadPage() {
   const [selectedBank, setSelectedBank] = useState('');
   const [detectedBank, setDetectedBank] = useState(null);
   const [fileStructure, setFileStructure] = useState(null);
+  const [uploadTimer, setUploadTimer] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Countdown timer for long requests (waking up server)
+  useEffect(() => {
+    let timer;
+    if (uploading) {
+      timer = setInterval(() => {
+        setUploadTimer(prev => prev + 1);
+      }, 1000);
+    } else {
+      setUploadTimer(0);
+    }
+    return () => clearInterval(timer);
+  }, [uploading]);
 
   // Handle demo file from welcome page
   useEffect(() => {
@@ -344,20 +358,34 @@ function UploadPage() {
           </div>
 
           {file && selectedBank && (
-            <button
-              onClick={handleUpload}
-              disabled={uploading}
-              className="upload-button"
-            >
-              {uploading ? (
-                <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  <span className="spinner"></span>
-                  Uploading...
-                </span>
-              ) : (
-                'Analyze My Finances'
+            <div style={{ width: '100%' }}>
+              <button
+                onClick={handleUpload}
+                disabled={uploading}
+                className="upload-button"
+              >
+                {uploading ? (
+                  <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <span className="spinner"></span>
+                    Uploading...
+                  </span>
+                ) : (
+                  'Analyze My Finances'
+                )}
+              </button>
+
+              {uploading && uploadTimer > 3 && (
+                <div style={{ marginTop: '20px', color: '#047857', fontSize: '0.95rem', textAlign: 'center', padding: '15px', backgroundColor: '#ecfdf5', borderRadius: '10px', border: '1px solid #34d399', boxShadow: '0 4px 10px rgba(0, 0, 0, 0.05)' }}>
+                  <p style={{ margin: '0 0 8px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <span className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderTopColor: '#047857' }}></span>
+                    Waking up secure server...
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.9rem', color: '#065f46' }}>
+                    Free servers take a moment to start. <br/> Estimated wait time: <strong style={{color: '#dc2626', fontSize: '1.05rem'}}>{Math.max(0, 50 - uploadTimer)}s</strong>
+                  </p>
+                </div>
               )}
-            </button>
+            </div>
           )}
 
           <div className="features">

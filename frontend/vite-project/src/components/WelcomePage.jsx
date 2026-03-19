@@ -72,6 +72,7 @@ const WelcomePage = () => {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
+          <img src="/kotak_logo.svg" alt="Kotak Mahindra Bank Logo" style={{ maxWidth: '280px', marginBottom: '20px' }} />
           <div className="hero-badge">Exclusive for Kotak Mahindra Bank Customers</div>
           <h1 className="hero-title">
             Kotak Finance <span className="gradient-text">Analyzer</span>
@@ -261,7 +262,7 @@ const WelcomePage = () => {
               href="/mysampleacc.pdf" 
               download="demo_kotak_statement.pdf" 
               className="btn-demo" 
-              style={{ background: 'white', color: '#0052CC', textDecoration: 'none', border: '2px solid #0052CC' }}
+              style={{ background: 'white', color: '#ED1C24', textDecoration: 'none', border: '2px solid #ED1C24', boxShadow: 'none' }}
             >
               Download Demo PDF
             </a>

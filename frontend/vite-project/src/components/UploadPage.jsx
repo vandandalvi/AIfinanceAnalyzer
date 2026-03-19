@@ -169,27 +169,37 @@ function UploadPage() {
   };
 
   return (
-    <div className="upload-page">
-      <div className="upload-container">
-        <div className="upload-content">
-          {/* Step Indicator */}
-          <div className="steps-indicator">
-            <div className={`step-item ${file ? 'completed' : 'active'}`}>
-              <div className="step-circle">1</div>
-              <span>Upload File</span>
-            </div>
-            <div className="step-line"></div>
-            <div className={`step-item ${selectedBank ? 'completed' : file ? 'active' : ''}`}>
-              <div className="step-circle">2</div>
-              <span>Select Bank</span>
-            </div>
-            <div className={`step-item ${file && selectedBank ? 'active' : ''}`}>
-              <div className="step-circle">3</div>
-              <span>Analyze</span>
-            </div>
-          </div>
+    <div className="upload-container">
+      <div className="upload-content">
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <img src="/kotak_logo.svg" alt="Kotak Mahindra Bank Logo" style={{ maxWidth: '220px' }} />
+        </div>
+        <div className="upload-header">
+          <button onClick={() => navigate('/')} className="back-button">
+            ← Back
+          </button>
+          <h1 className="upload-title">Upload Your Bank Statement</h1>
+          <p className="upload-subtitle">Get started by uploading your bank statement file.</p>
+        </div>
 
-          <div className="upload-box">
+        {/* Step Indicator */}
+        <div className="steps-indicator">
+          <div className={`step-item ${file ? 'completed' : 'active'}`}>
+            <div className="step-circle">1</div>
+            <span>Upload File</span>
+          </div>
+          <div className="step-line"></div>
+          <div className={`step-item ${selectedBank ? 'completed' : file ? 'active' : ''}`}>
+            <div className="step-circle">2</div>
+            <span>Select Bank</span>
+          </div>
+          <div className={`step-item ${file && selectedBank ? 'active' : ''}`}>
+            <div className="step-circle">3</div>
+            <span>Analyze</span>
+          </div>
+        </div>
+
+        <div className="upload-box">
           <div
             className={`drop-zone ${dragOver ? 'drag-over' : ''}`}
             onDrop={handleDrop}
@@ -298,11 +308,8 @@ function UploadPage() {
             <div className="feature-item">Secure and private analysis</div>
             <div className="feature-item">Get AI-powered financial insights</div>
           </div>
-          </div>
         </div>
       </div>
     </div>
   );
-}
-
-export default UploadPage;
+}export default UploadPage;

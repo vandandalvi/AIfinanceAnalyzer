@@ -72,16 +72,13 @@ const WelcomePage = () => {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
-          <div className="hero-badge">AI-Powered Finance</div>
+          <div className="hero-badge">Exclusive for Kotak Mahindra Bank Customers</div>
           <h1 className="hero-title">
-            Personal Finance <span className="gradient-text">Manager</span>
+            Kotak Finance <span className="gradient-text">Analyzer</span>
           </h1>
           <p className="hero-subtitle">
-            Take control of your finances with intelligent insights, automated categorization, 
-            and AI-powered analysis. Upload your bank statements and get instant visibility.
-          </p>
-          
-            {/* Backend Status Indicator */}
+            Take control of your finances. This analyzer is built exclusively to support your Kotak Bank statements (Yearly or Monthly). Upload your Kotak statement and get instant AI-powered visibility.
+          </p>            {/* Backend Status Indicator */}
             <div className="backend-status">
               <div className="status-indicator">
                 <span className={`status-dot ${backendStatus === 'waking' ? 'pulsing' : ''} ${backendStatus === 'ready' ? 'ready' : ''}`}></span>
@@ -163,8 +160,8 @@ const WelcomePage = () => {
             </div>
             <div className="why-card">
               <div className="why-icon">🤝</div>
-              <h3>Works With Your Bank</h3>
-              <p>Compatible with major Indian banks including SBI, Kotak, Axis, and more. Just export your statement and upload.</p>
+              <h3>Works With Kotak</h3>
+              <p>Tailor-made specifically for Kotak Mahindra Bank statements. Just export your monthly or yearly statement and upload.</p>
             </div>
           </div>
         </div>
@@ -176,8 +173,8 @@ const WelcomePage = () => {
         <div className="features-grid">
           <div className="feature-card">
             <div className="feature-icon">🏦</div>
-            <h3>Multi-Bank Support</h3>
-            <p>Upload statements from SBI, Kotak, Axis Bank and more. Automatic format detection.</p>
+            <h3>Exclusive Kotak Support</h3>
+            <p>Upload statements directly from Kotak Mahindra Bank. Instant format detection and strict processing accuracy.</p>
           </div>
           <div className="feature-card">
             <div className="feature-icon">🎯</div>

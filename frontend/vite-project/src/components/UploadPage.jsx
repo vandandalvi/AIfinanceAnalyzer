@@ -74,62 +74,22 @@ function UploadPage() {
 
     // Validate file type
     const isCsv = selectedFile.type === 'text/csv' || selectedFile.name.toLowerCase().endsWith('.csv');
-    const isPdf = selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf');
-    
+    const isPdf = selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf');   
+
     if (!isCsv && !isPdf) {
       alert("Please upload a valid .csv or .pdf file.");
       return;
     }
 
     setFile(selectedFile);
-    setDetectedBank(null);
-    setFileStructure(null);
+    setSelectedBank('kotak');
+    setDetectedBank('kotak');
+  };
 
-    // Detect bank from CSV content
-    if (isCsv) {
-      const detection = await detectBankFromCSV(selectedFile);
-      setFileStructure(detection);
-      setDetectedBank(detection.bank);
-
-      // Auto-select the detected bank
-      if (detection.bank) {
-        setSelectedBank(detection.bank);
-      }
-    } else if (isPdf) {
-      // For PDFs, we can auto-detect Kotak since it's the only one implemented initially,
-      // or at least require the user to choose Kotak manually.
-      setSelectedBank('kotak');
-      setDetectedBank('kotak');
+  const validateBankSelection = () => {
+    if (!file) {
+      return { valid: false, message: 'Please select a file.' };  
     }
-  };  const validateBankSelection = () => {
-    if (!file || !selectedBank) {
-      return { valid: false, message: 'Please select both a file and your bank.' };
-    }
-
-    // Check if we detected a bank from CSV structure
-    if (detectedBank && detectedBank !== selectedBank) {
-      const bankNames = {
-        sbi: 'State Bank of India (SBI)',
-        kotak: 'Kotak Mahindra Bank',
-        axis: 'Axis Bank'
-      };
-      
-      return {
-        valid: false,
-        message: `❌ CSV Format Mismatch!\n\nYour CSV file structure matches: ${bankNames[detectedBank]}\nBut you selected: ${bankNames[selectedBank]}\n\nThis will cause parsing errors and incorrect data.\n\nPlease select the correct bank: ${bankNames[detectedBank]}`,
-        critical: true
-      };
-    }
-
-    // Warn if we couldn't detect the bank
-    if (!detectedBank) {
-      return {
-        valid: false,
-        message: '⚠️ Warning: Could not automatically detect bank format from CSV structure.\n\nPlease ensure you have selected the correct bank, or the upload may fail.\n\nDo you want to continue?',
-        warning: true
-      };
-    }
-
     return { valid: true };
   };
 
@@ -223,7 +183,6 @@ function UploadPage() {
               <div className="step-circle">2</div>
               <span>Select Bank</span>
             </div>
-            <div className="step-line"></div>
             <div className={`step-item ${file && selectedBank ? 'active' : ''}`}>
               <div className="step-circle">3</div>
               <span>Analyze</span>
@@ -284,65 +243,11 @@ function UploadPage() {
             )}
           </div>
 
-          <div className="bank-selection">
+          <div className="bank-selection" style={{ display: 'none' }}>
             <h3>Select Your Bank</h3>
-            {detectedBank && file && (
-              <p style={{
-                marginBottom: '10px',
-                padding: '10px 12px',
-                backgroundColor: '#d1fae5',
-                color: '#065f46',
-                borderRadius: '6px',
-                fontSize: '0.9rem',
-                border: '1px solid #10b981'
-              }}>
-                ✅ CSV Structure Detected: <strong>{
-                  detectedBank === 'sbi' ? 'State Bank of India (SBI)' :
-                  detectedBank === 'kotak' ? 'Kotak Mahindra Bank' :
-                  detectedBank === 'axis' ? 'Axis Bank' : ''
-                }</strong>
-              </p>
-            )}
-            {!detectedBank && file && (
-              <p style={{
-                marginBottom: '10px',
-                padding: '10px 12px',
-                backgroundColor: '#fef3c7',
-                color: '#92400e',
-                borderRadius: '6px',
-                fontSize: '0.9rem',
-                border: '1px solid #fbbf24'
-              }}>
-                ⚠️ Could not detect bank format. Please select manually.
-              </p>
-            )}
-            {detectedBank && selectedBank && detectedBank !== selectedBank && (
-              <p style={{
-                marginBottom: '10px',
-                padding: '10px 12px',
-                backgroundColor: '#fee2e2',
-                color: '#991b1b',
-                borderRadius: '6px',
-                fontSize: '0.9rem',
-                border: '2px solid #ef4444',
-                fontWeight: '600'
-              }}>
-                ❌ MISMATCH ERROR: CSV is <strong>{
-                  detectedBank === 'sbi' ? 'SBI' :
-                  detectedBank === 'kotak' ? 'Kotak' :
-                  detectedBank === 'axis' ? 'Axis' : ''
-                }</strong> format, but you selected <strong>{
-                  selectedBank === 'sbi' ? 'SBI' :
-                  selectedBank === 'kotak' ? 'Kotak' :
-                  selectedBank === 'axis' ? 'Axis' : ''
-                }</strong>!
-              </p>
-            )}
             <div className="bank-grid">
               {[
-                { id: 'sbi', name: 'State Bank of India', logo: '🏦', format: 'SBI Statement Format' },
-                { id: 'kotak', name: 'Kotak Mahindra Bank', logo: '🏛️', format: 'Kotak CSV Format' },
-                { id: 'axis', name: 'Axis Bank', logo: '🏢', format: 'Axis Statement Format' }
+                { id: 'kotak', name: 'Kotak Mahindra Bank', logo: '🏦', format: 'Kotak CSV Format' }
               ].map((bank) => (
                 <button
                   key={bank.id}
@@ -389,8 +294,8 @@ function UploadPage() {
           )}
 
           <div className="features">
-            <div className="feature-item">Upload your bank's CSV statement</div>
-            <div className="feature-item">Select correct bank for smart parsing</div>
+            <div className="feature-item">Upload your Kotak bank statement</div>
+            <div className="feature-item">Secure and private analysis</div>
             <div className="feature-item">Get AI-powered financial insights</div>
           </div>
           </div>

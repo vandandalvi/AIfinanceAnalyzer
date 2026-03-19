@@ -6,7 +6,7 @@
   overflow-x: hidden;
 }
 
-/* Hero Section - Professional Blue Theme */
+/* Hero Section - Kotak Theme */
 .hero-section {
   padding: 80px 20px 60px;
   min-height: 100vh;
@@ -16,7 +16,7 @@
   justify-content: center;
   gap: 50px;
   position: relative;
-  background: radial-gradient(circle at top right, #0066FF 0%, #0052CC 40%, #1A365D 100%);
+  background: radial-gradient(circle at top right, #ED1C24 0%, #bd0f16 40%, #003366 100%);
   overflow: hidden;
 }
 
@@ -66,7 +66,7 @@
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #00D2FF 0%, #3A7BD5 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #ffcccc 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -248,8 +248,8 @@
 
 .why-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 82, 204, 0.15);
-  border-color: #0052CC;
+  box-shadow: 0 8px 20px rgba(237, 28, 36, 0.15);
+  border-color: #ED1C24;
 }
 
 .why-icon {
@@ -261,7 +261,7 @@
 .why-card h3 {
   font-size: 20px;
   font-weight: 700;
-  color: #0052CC;
+  color: #ED1C24;
   margin: 0 0 12px 0;
 }
 
@@ -282,7 +282,8 @@
   text-align: center;
   font-size: 32px;
   font-weight: 800;
-  background-color: #2245ae;
+  background-color: #003366;
+  color: white;
   border-radius: 20px;
   padding: 10px;
   margin: 0 0 50px 0;
@@ -335,7 +336,7 @@
 /* How It Works Section */
 .how-it-works-section {
   padding: 80px 20px;
-  background: linear-gradient(135deg, #0052CC 0%, #2684FF 100%);
+  background: linear-gradient(135deg, #003366 0%, #001a33 100%);
 }
 
 .how-it-works-section .section-title {
@@ -454,15 +455,15 @@
 
 .btn-demo,
 .btn-cta {
-  background: linear-gradient(135deg, #0052CC 0%, #2684FF 100%);
+  background: linear-gradient(135deg, #ED1C24 0%, #bd0f16 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(0, 82, 204, 0.3);
+  box-shadow: 0 4px 15px rgba(237, 28, 36, 0.3);
 }
 
 .btn-demo:hover,
 .btn-cta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 82, 204, 0.4);
+  box-shadow: 0 6px 20px rgba(237, 28, 36, 0.4);
 }
 
 /* CTA Section */

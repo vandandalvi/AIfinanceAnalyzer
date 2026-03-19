@@ -1,0 +1,44 @@
+🚀 Excited to share my latest project: AI-Powered Personal Finance Manager! 💰📊
+
+Transform your bank statements into actionable insights with the power of AI!
+
+🎯 What it does:
+✅ Upload CSV from SBI, Axis, or Kotak - auto-detects bank format
+✅ AI analyzes spending patterns using Google Gemini
+✅ Beautiful dashboards with category breakdowns & trends
+✅ Advanced analytics with merchant insights
+✅ Chat with AI financial advisor in natural language
+✅ Mobile-first responsive design
+
+💻 Built with:
+• Frontend: React 19 + Vite + Chart.js
+• Backend: Python Flask + Pandas + NumPy
+• AI: Google Gemini API
+• Deployed on Vercel + Render
+
+🌟 Special Features:
+🔹 Intelligent bank format detection
+🔹 Real-time AI chat about your finances
+🔹 Privacy-first (no data storage)
+🔹 One-click demo with sample data
+🔹 Auto-categorization of expenses
+
+🔗 Live Demo: https://aipoweredfinanceadvisor.vercel.app
+
+This project challenged me to integrate AI APIs, handle multi-format data parsing, and build a production-ready full-stack application!
+
+Would love your feedback! What features would you add to a personal finance manager? 💭
+
+#WebDevelopment #FullStack #AI #MachineLearning #PersonalFinance #React #Python #Flask #FinTech #GeminiAI #DataAnalysis #CloudComputing #TechProjects
+
+---
+
+📸 Swipe through to see:
+1️⃣ Professional landing page
+2️⃣ Smart bank auto-detection
+3️⃣ Interactive analytics dashboard
+4️⃣ AI-powered insights
+5️⃣ Advanced analysis features
+6️⃣ Financial advisor chat
+
+Open to feedback and collaboration opportunities! 🤝

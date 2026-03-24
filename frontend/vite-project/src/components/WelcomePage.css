@@ -71,6 +71,46 @@
   margin: 0 auto 30px;
 }
 
+/* Backend Status Indicator */
+.backend-status {
+  margin: 0 auto 30px;
+  padding: 12px 20px;
+  background: rgba(237, 28, 36, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(237, 28, 36, 0.15);
+  display: inline-block;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+.status-dot.ready {
+  background: #10B981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+}
+
+.status-dot.pulsing {
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.8);
+}
+
+.status-text {
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
 /* Gradient Text Effect */
 .gradient-text {
   background: linear-gradient(135deg, #ED1C24 0%, #bd0f16 100%);

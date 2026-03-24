@@ -83,7 +83,7 @@ const WelcomePage = () => {
             <div className="backend-status">
               <div className="status-indicator">
                 <span className={`status-dot ${backendStatus === 'waking' ? 'pulsing' : ''} ${backendStatus === 'ready' ? 'ready' : ''}`}></span>
-                <span className="status-text text-white">
+                <span className="status-text">
                   {backendStatus === 'checking' && 'Connecting to server...'}
                   {backendStatus === 'waking' && 'Waking up server (Wait...)'}
                   {backendStatus === 'ready' && 'Server is Live & Ready!'}

@@ -1,4 +1,4 @@
-# 💰 Personal Finance Manager
+# 💰 AI Finance Manager
 
 A modern, mobile-first AI-powered personal finance application with intelligent transaction categorization and insights. Built for Data Science Lab Project 2025.
 

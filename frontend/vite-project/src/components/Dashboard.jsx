@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend, LineElement, PointElement } from 'chart.js';
 import { Bar, Pie, Line } from 'react-chartjs-2';
@@ -11,17 +11,65 @@ function Dashboard() {
   const [data, setData] = useState(null);
   const [aiSuggestions, setAiSuggestions] = useState('');
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const DASHBOARD_CACHE_KEY = 'dashboardDataV3';
+  const AI_CACHE_KEY = 'aiInsightsV3';
+  const CACHE_TTL_MS = 1000 * 60 * 5;
 
   useEffect(() => {
     fetchDashboardData();
     fetchAiSuggestions();
   }, []);
 
-  const fetchDashboardData = async () => {
+  const getCachedValue = (key) => {
     try {
-      const response = await axios.post(API_ENDPOINTS.dashboard);
+      const raw = sessionStorage.getItem(key);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed?.timestamp || Date.now() - parsed.timestamp > CACHE_TTL_MS) return null;
+      return parsed.value;
+    } catch {
+      return null;
+    }
+  };
+
+  const setCachedValue = (key, value) => {
+    try {
+      sessionStorage.setItem(key, JSON.stringify({ value, timestamp: Date.now() }));
+    } catch {
+      // ignore storage quota issues
+    }
+  };
+
+  const fetchDashboardData = async () => {
+    const forceRefresh = Boolean(location.state?.forceRefresh);
+
+    if (forceRefresh) {
+      sessionStorage.removeItem(DASHBOARD_CACHE_KEY);
+    }
+
+    const cached = getCachedValue(DASHBOARD_CACHE_KEY);
+    if (cached && !forceRefresh) {
+      setData(cached);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      let response;
+      for (let attempt = 1; attempt <= 2; attempt += 1) {
+        try {
+          response = await axios.post(API_ENDPOINTS.dashboard, {}, { timeout: 20000 });
+          break;
+        } catch (error) {
+          if (attempt === 2) throw error;
+        }
+      }
       setData(response.data);
+      setCachedValue(DASHBOARD_CACHE_KEY, response.data);
     } catch (error) {
       console.error('Dashboard data error:', error);
       // Add a delay before redirecting to allow user to see what happened
@@ -35,8 +83,14 @@ function Dashboard() {
   };
 
   const fetchAiSuggestions = async () => {
-    const cachedInsights = sessionStorage.getItem('aiInsights');
-    if (cachedInsights) {
+    const forceRefresh = Boolean(location.state?.forceRefresh);
+
+    if (forceRefresh) {
+      sessionStorage.removeItem(AI_CACHE_KEY);
+    }
+
+    const cachedInsights = getCachedValue(AI_CACHE_KEY);
+    if (cachedInsights && !forceRefresh) {
       setAiSuggestions(cachedInsights);
       return;
     }
@@ -44,14 +98,113 @@ function Dashboard() {
     try {
       const response = await axios.post(API_ENDPOINTS.chat, {
         query: 'Give me 3 quick insights about my spending patterns and top saving opportunities'
-      });
+      }, { timeout: 25000 });
       setAiSuggestions(response.data.response);
-      sessionStorage.setItem('aiInsights', response.data.response);
+      setCachedValue(AI_CACHE_KEY, response.data.response);
     } catch (error) {
       console.error('AI suggestions error:', error);
       setAiSuggestions('Unable to generate AI insights at the moment.');
     }
   };
+
+  const handleExport = async (url, type) => {
+    setExporting(type);
+    try {
+      const response = await axios.get(url, { responseType: 'blob', timeout: 30000 });
+      const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.setAttribute('download', type === 'csv' ? 'transactions_export.csv' : 'finance_report.json');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error(`Export ${type} failed:`, error);
+      alert('Export failed. Please try again.');
+    } finally {
+      setExporting('');
+    }
+  };
+
+  const healthScore = data?.healthScore || { score: 0, grade: 'D', factors: [], monthly: [] };
+  const categoryIntelligence = data?.categoryIntelligence || {
+    uncategorizedPercent: 0,
+    uncategorizedCount: 0,
+    topNeedsReview: [],
+    suggestions: [],
+  };
+
+  const healthTone = useMemo(() => {
+    if (healthScore.score >= 85) return 'text-emerald-600 bg-emerald-50';
+    if (healthScore.score >= 70) return 'text-blue-600 bg-blue-50';
+    if (healthScore.score >= 55) return 'text-amber-600 bg-amber-50';
+    return 'text-red-600 bg-red-50';
+  }, [healthScore.score]);
+
+  const normalizeCategoryForInsights = (category = '') => {
+    const c = String(category || '').trim();
+    if (!c) return 'Other';
+
+    if (c.startsWith('UPI - ')) return c.replace('UPI - ', '');
+    if (['UPI Payments', 'Money Transfer', 'Credit Card'].includes(c)) return 'Transfers';
+    if (c === 'Food & Dining') return 'Food';
+    if (c === 'Cash Withdrawal') return 'Cash';
+    return c;
+  };
+
+  const groupedCategories = useMemo(() => {
+    const raw = data?.categories || [];
+    const totals = raw.reduce((acc, row) => {
+      const bucket = normalizeCategoryForInsights(row.category);
+      const value = Math.abs(Number(row.total || 0));
+      acc[bucket] = (acc[bucket] || 0) + value;
+      return acc;
+    }, {});
+
+    return Object.entries(totals)
+      .map(([category, total]) => ({ category, total }))
+      .sort((a, b) => b.total - a.total);
+  }, [data]);
+
+  const transferBreakdown = useMemo(() => {
+    const raw = data?.categories || [];
+    const transferRows = raw.filter((row) => ['UPI Payments', 'Money Transfer', 'Credit Card'].includes(String(row.category || '')));
+
+    const labelMap = {
+      'UPI Payments': 'UPI (Generic/Unknown)',
+      'Money Transfer': 'Bank Transfer',
+      'Credit Card': 'Card Payment',
+    };
+
+    const totals = transferRows.reduce((acc, row) => {
+      const label = labelMap[row.category] || row.category;
+      const value = Math.abs(Number(row.total || 0));
+      acc[label] = (acc[label] || 0) + value;
+      return acc;
+    }, {});
+
+    const items = Object.entries(totals)
+      .map(([label, total]) => ({ label, total }))
+      .sort((a, b) => b.total - a.total);
+
+    const total = items.reduce((sum, item) => sum + item.total, 0);
+    return { items, total };
+  }, [data]);
+
+  const quickInsights = useMemo(() => {
+    const top = groupedCategories[0];
+    const monthlyTotals = (data?.monthly || []).map((m) => Math.abs(Number(m.total || 0)));
+    const avgMonth = monthlyTotals.length
+      ? monthlyTotals.reduce((s, v) => s + v, 0) / monthlyTotals.length
+      : 0;
+    const net = Number(data?.reportSummary?.net || 0);
+    return {
+      topCategory: top ? `${top.category} (₹${Math.round(top.total).toLocaleString()})` : 'No category data',
+      avgMonthlyBurn: `₹${Math.round(avgMonth).toLocaleString()}`,
+      netStatus: net >= 0 ? `+₹${Math.round(net).toLocaleString()}` : `-₹${Math.round(Math.abs(net)).toLocaleString()}`,
+    };
+  }, [groupedCategories, data]);
 
   if (loading) {
     return (
@@ -81,10 +234,10 @@ function Dashboard() {
   }
 
   const categoryData = {
-    labels: data.categories?.map(c => c.category) || [],
+    labels: groupedCategories.map(c => c.category),
     datasets: [{
       label: 'Spending by Category (₹)',
-      data: data.categories?.map(c => Math.abs(c.total)) || [],
+      data: groupedCategories.map(c => Math.abs(c.total)),
       backgroundColor: [
         '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6',
         '#06B6D4', '#F97316', '#84CC16', '#EC4899', '#6B7280'
@@ -148,6 +301,20 @@ function Dashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
                 <span>Financial Advisor(AI)</span>
+              </button>
+              <button
+                onClick={() => handleExport(API_ENDPOINTS.exportCsv, 'csv')}
+                disabled={exporting === 'csv'}
+                className="px-3 sm:px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-60 flex-grow sm:flex-grow-0 text-sm sm:text-base"
+              >
+                {exporting === 'csv' ? 'Exporting...' : 'Export CSV'}
+              </button>
+              <button
+                onClick={() => handleExport(API_ENDPOINTS.exportReport, 'report')}
+                disabled={exporting === 'report'}
+                className="px-3 sm:px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-60 flex-grow sm:flex-grow-0 text-sm sm:text-base"
+              >
+                {exporting === 'report' ? 'Exporting...' : 'Export Report'}
               </button>
               <button
                 onClick={() => navigate('/')}
@@ -220,6 +387,83 @@ function Dashboard() {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-sm p-4 lg:p-5">
+            <p className="text-xs uppercase tracking-wide text-gray-500">Top Spend Bucket</p>
+            <p className="mt-2 text-base lg:text-lg font-semibold text-gray-900">{quickInsights.topCategory}</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm p-4 lg:p-5">
+            <p className="text-xs uppercase tracking-wide text-gray-500">Average Monthly Burn</p>
+            <p className="mt-2 text-base lg:text-lg font-semibold text-gray-900">{quickInsights.avgMonthlyBurn}</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm p-4 lg:p-5">
+            <p className="text-xs uppercase tracking-wide text-gray-500">Net Cashflow</p>
+            <p className="mt-2 text-base lg:text-lg font-semibold text-gray-900">{quickInsights.netStatus}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8">
+          <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-gray-900">Monthly Health Score</h3>
+              <span className={`px-3 py-1 rounded-full text-sm font-bold ${healthTone}`}>
+                {healthScore.score}/100 • {healthScore.grade}
+              </span>
+            </div>
+            <div className="space-y-2 mb-4">
+              {(healthScore.factors || []).slice(0, 4).map((factor) => (
+                <div key={factor.name} className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">{factor.name}</span>
+                  <span className={`font-semibold ${factor.impact >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    {factor.impact >= 0 ? '+' : ''}{factor.impact}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Recent Monthly Scores</p>
+              <div className="flex flex-wrap gap-2">
+                {(healthScore.monthly || []).slice(-6).map((m) => (
+                  <span key={m.month} className="px-2.5 py-1 rounded-lg bg-gray-100 text-xs text-gray-700">
+                    {m.month}: {m.score}
+                  </span>
+                ))}
+                {(healthScore.monthly || []).length === 0 && (
+                  <span className="text-sm text-gray-500">Not enough monthly data yet.</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Category Intelligence v2</h3>
+            <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
+              <p className="text-sm text-amber-800 font-medium">
+                Uncategorized: {categoryIntelligence.uncategorizedCount} txns ({categoryIntelligence.uncategorizedPercent}%)
+              </p>
+            </div>
+            <div className="mb-4">
+              <p className="text-sm font-medium text-gray-700 mb-2">Needs Review</p>
+              <div className="space-y-2">
+                {(categoryIntelligence.topNeedsReview || []).slice(0, 3).map((item) => (
+                  <div key={item.Description} className="text-sm text-gray-600 flex items-center justify-between">
+                    <span className="truncate pr-3">{item.Description}</span>
+                    <span className="font-semibold text-gray-800">₹{Math.round(item.total || 0)}</span>
+                  </div>
+                ))}
+                {(categoryIntelligence.topNeedsReview || []).length === 0 && (
+                  <p className="text-sm text-gray-500">Great job — categories are mostly clean.</p>
+                )}
+              </div>
+            </div>
+            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
+              {(categoryIntelligence.suggestions || []).slice(0, 2).map((tip) => (
+                <li key={tip}>{tip}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-8">
           {/* Category Pie Chart */}
@@ -228,6 +472,22 @@ function Dashboard() {
             <div className="h-64 lg:h-80">
               <Pie data={categoryData} options={{ responsive: true, maintainAspectRatio: false }} />
             </div>
+            {transferBreakdown.total > 0 && (
+              <div className="mt-4 border-t border-gray-100 pt-3">
+                <p className="text-sm font-semibold text-gray-800 mb-2">Transfers breakdown</p>
+                <div className="space-y-1.5">
+                  {transferBreakdown.items.map((item) => {
+                    const pct = transferBreakdown.total > 0 ? (item.total / transferBreakdown.total) * 100 : 0;
+                    return (
+                      <div key={item.label} className="flex items-center justify-between text-xs sm:text-sm text-gray-600">
+                        <span>{item.label}</span>
+                        <span className="font-medium text-gray-800">₹{Math.round(item.total).toLocaleString()} ({pct.toFixed(0)}%)</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Monthly Line Chart */}

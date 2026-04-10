@@ -9,6 +9,8 @@ export const API_ENDPOINTS = {
   dashboard: `${API_BASE_URL}/dashboard`,
   chat: `${API_BASE_URL}/chat`,
   advancedAnalytics: `${API_BASE_URL}/advanced-analytics`,
+  exportCsv: `${API_BASE_URL}/export/transactions.csv`,
+  exportReport: `${API_BASE_URL}/export/report.json`,
 };
 
 export default API_BASE_URL;

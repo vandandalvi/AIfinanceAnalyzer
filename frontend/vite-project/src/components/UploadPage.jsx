@@ -123,10 +123,17 @@ function UploadPage() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       console.log('Upload success:', response.data);
-      sessionStorage.removeItem('aiInsights');
+      // Clear all cached insights/dashboard snapshots so latest upload is always reflected
+      [
+        'aiInsights',
+        'aiInsightsV2',
+        'aiInsightsV3',
+        'dashboardDataV2',
+        'dashboardDataV3'
+      ].forEach((k) => sessionStorage.removeItem(k));
       // Add a small delay to ensure backend has processed the file
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/dashboard', { state: { forceRefresh: true, uploadedAt: Date.now() } });
       }, 500);
     } catch (error) {
       console.error('Upload error:', error);

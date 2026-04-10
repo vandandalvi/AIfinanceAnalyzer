@@ -169,8 +169,9 @@ function UploadPage() {
   };
 
   return (
-    <div className="upload-container">
-      <div className="upload-content">
+    <div className="upload-page">
+      <div className="upload-container">
+        <div className="upload-content">
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
           <img src="/kotak_logo.svg" alt="Kotak Mahindra Bank Logo" style={{ maxWidth: '220px' }} />
         </div>
@@ -242,7 +243,7 @@ function UploadPage() {
                 </div>
                 <div style={{ marginTop: '30px', borderTop: '1px solid #e2e8f0', paddingTop: '20px', position: 'relative', zIndex: 10 }}>
                   <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '10px' }}>Don't have a statement handy?</p>
-                  <a href="/mysampleacc.pdf" download="demo_kotak_statement.pdf" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#059669', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem', padding: '10px 20px', backgroundColor: '#d1fae5', borderRadius: '8px', border: '1px solid #a7f3d0' }}>
+                  <a href="/mysampleacc.pdf" download="demo_kotak_statement.pdf" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#ED1C24', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem', padding: '10px 20px', backgroundColor: '#fff1f2', borderRadius: '8px', border: '1px solid #fecdd3' }}>
                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
@@ -311,5 +312,8 @@ function UploadPage() {
         </div>
       </div>
     </div>
+    </div>
   );
-}export default UploadPage;
+}
+
+export default UploadPage;

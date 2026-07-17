@@ -17,6 +17,7 @@
 ### Step 2: Configure Service
 - **Name**: `personal-finance-backend` (or your choice)
 - **Environment**: `Python 3`
+
 - **Region**: Choose closest to your users
 - **Branch**: `main`
 - **Root Directory**: Leave empty
